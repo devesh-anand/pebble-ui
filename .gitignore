@@ -1,0 +1,35 @@
+# Go build outputs
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Binaries / build dirs
+/pebble-ui
+/bin/
+/dist/
+
+# Go workspace / tooling
+/vendor/
+/coverage.out
+/profile.out
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+/.cursor/
+
+/pebble-ui
