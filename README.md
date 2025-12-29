@@ -11,26 +11,32 @@ A web-based UI to browse PebbleDB key-value pairs.
   - **Contains** (slower; scans all keys in-memory)
 - **Live DB support** via `--snapshot` (for DBs with a `LOCK` file)
 
-## Install / Build
+## Install
 
-Build locally:
+### Install with Go (recommended)
 
 ```bash
-go build -o pebble-ui ./cmd/pebble-ui
+go install github.com/devesh/pebble-ui/cmd/pebble-ui@latest
 ```
+
+This installs the `pebble-ui` binary into:
+- `$(go env GOBIN)` (if set), otherwise
+- `$(go env GOPATH)/bin` (commonly `~/go/bin`)
+
+If `pebble-ui` is not found after install, add `~/go/bin` to your `PATH`.
 
 ## Usage
 
 Run (read-only):
 
 ```bash
-./pebble-ui --db /path/to/pebble
+pebble-ui --db /path/to/pebble
 ```
 
 Run against a **live/locked DB** (recommended for apps like Thanos):
 
 ```bash
-./pebble-ui --db /path/to/pebble --snapshot
+pebble-ui --db /path/to/pebble --snapshot
 ```
 
 Open the UI at `http://localhost:8080`.
@@ -42,6 +48,24 @@ Open the UI at `http://localhost:8080`.
 - **`--port`**: HTTP port (default: `8080`)
 - **`--snapshot`**: Create a temporary hard-link snapshot to open a locked/live DB
 - **`--version`**: Print version and exit
+
+## Build from source (alternative)
+
+```bash
+go build -o pebble-ui ./cmd/pebble-ui
+```
+
+Then run:
+
+```bash
+./pebble-ui --db /path/to/pebble
+```
+
+For a live/locked DB:
+
+```bash
+./pebble-ui --db /path/to/pebble --snapshot
+```
 
 ## HTTP API (for debugging)
 
