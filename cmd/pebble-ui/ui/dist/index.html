@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pebble UI Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <div class="stats" id="db-stats">
+                <span id="db-path-display">DB: Loading...</span>
+                <span id="key-count-display">Keys: ...</span>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Search keys...">
+                <select id="search-mode">
+                    <option value="prefix">Prefix</option>
+                    <option value="substring">Contains</option>
+                </select>
+                <button id="refresh-btn">Refresh</button>
+            </div>
+        </header>
+
+        <main>
+            <div id="sidebar">
+                <div id="key-list-container">
+                    <ul id="key-list"></ul>
+                </div>
+                <div id="pagination">
+                    <button id="prev-btn" disabled>Prev</button>
+                    <span id="page-info">Page 1</span>
+                    <button id="next-btn" disabled>Next</button>
+                </div>
+            </div>
+            <div id="resize-handle"></div>
+            <div id="content">
+                <div id="value-viewer" class="hidden">
+                    <div class="value-header">
+                        <h2 id="current-key"></h2>
+                        <div class="value-actions">
+                            <span id="value-size"></span>
+                            <button id="copy-btn">Copy</button>
+                        </div>
+                    </div>
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="raw">Raw</button>
+                        <button class="tab-btn" data-tab="json">JSON</button>
+                        <button class="tab-btn" data-tab="hex">Hex</button>
+                    </div>
+                    <pre id="value-display"></pre>
+                </div>
+                <div id="no-selection">
+                    Select a key to view its value
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
