@@ -10,8 +10,8 @@ import (
 	"strconv"
 
 	"github.com/cockroachdb/pebble"
-	"github.com/devesh/pebble-ui/internal/db"
-	"github.com/devesh/pebble-ui/internal/models"
+	"github.com/devesh-anand/pebble-ui/internal/db"
+	"github.com/devesh-anand/pebble-ui/internal/models"
 )
 
 type Server struct {

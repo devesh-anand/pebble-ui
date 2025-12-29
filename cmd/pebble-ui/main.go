@@ -12,8 +12,8 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/devesh/pebble-ui/internal/db"
-	"github.com/devesh/pebble-ui/internal/server"
+	"github.com/devesh-anand/pebble-ui/internal/db"
+	"github.com/devesh-anand/pebble-ui/internal/server"
 )
 
 //go:embed ui/dist/*

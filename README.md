@@ -16,7 +16,7 @@ A web-based UI to browse PebbleDB key-value pairs.
 ### Install with Go (recommended)
 
 ```bash
-go install github.com/devesh/pebble-ui/cmd/pebble-ui@latest
+go install github.com/devesh-anand/pebble-ui/cmd/pebble-ui@latest
 ```
 
 This installs the `pebble-ui` binary into:
