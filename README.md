@@ -33,6 +33,12 @@ Run (read-only):
 pebble-ui --db /path/to/pebble
 ```
 
+Run on a different port / bind address:
+
+```bash
+pebble-ui --db /path/to/pebble --host 0.0.0.0 --port 9090
+```
+
 Run against a **live/locked DB** (recommended for apps like Thanos):
 
 ```bash

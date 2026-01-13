@@ -6,6 +6,12 @@
 ./pebble-ui --db /path/to/pebble
 ```
 
+Custom host/port:
+
+```bash
+./pebble-ui --db /path/to/pebble --host 0.0.0.0 --port 9090
+```
+
 ### Flags
 
 - `--db` (required): Path to Pebble DB directory
