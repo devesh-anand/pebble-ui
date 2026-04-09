@@ -3,13 +3,25 @@
 ## CLI
 
 ```bash
-./pebble-ui --db /path/to/pebble
+pebble-ui --db /path/to/pebble
 ```
 
 Custom host/port:
 
 ```bash
-./pebble-ui --db /path/to/pebble --host 0.0.0.0 --port 9090
+pebble-ui --db /path/to/pebble --host 0.0.0.0 --port 9090
+```
+
+With authentication:
+
+```bash
+pebble-ui --db /path/to/pebble --username admin --password secret
+```
+
+Enable Contains search (disabled by default):
+
+```bash
+pebble-ui --db /path/to/pebble --substring-search
 ```
 
 ### Flags
@@ -17,6 +29,9 @@ Custom host/port:
 - `--db` (required): Path to Pebble DB directory
 - `--host` (default: `localhost`): Bind address
 - `--port` (default: `8080`): HTTP port
+- `--username`: Basic auth username (requires `--password`)
+- `--password`: Basic auth password (requires `--username`)
+- `--substring-search` (default: `false`): Enable the Contains search mode (scans all keys, CPU-intensive on large DBs)
 - `--snapshot` (default: `false`): Create a temporary hard-link snapshot to open a locked/live DB directory
 - `--version`: Print version and exit
 
@@ -28,14 +43,62 @@ Notes:
 - Snapshot uses **hard links**, so the snapshot directory must be on the **same filesystem/partition** as the DB.
 - The snapshot skips the `LOCK` file.
 
+## Embed in a Go service
+
+Add the package:
+
+```bash
+go get github.com/devesh-anand/pebble-ui@latest
+```
+
+Mount at any route using your existing `*pebble.DB`:
+
+```go
+import pebbleui "github.com/devesh-anand/pebble-ui"
+
+// Basic — prefix search only, no auth
+mux.Handle("/pebble-ui/", http.StripPrefix("/pebble-ui", pebbleui.Handler(db)))
+
+// With all options
+mux.Handle("/pebble-ui/", http.StripPrefix("/pebble-ui",
+    pebbleui.Handler(db,
+        pebbleui.WithBasicAuth("admin", "secret"),
+        pebbleui.WithSubstringSearch(),
+        pebbleui.WithDBPath("/path/to/db"),
+    ),
+))
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `WithBasicAuth(user, pass)` | Enable HTTP Basic Authentication |
+| `WithSubstringSearch()` | Enable the Contains search mode (CPU-intensive on large DBs) |
+| `WithDBPath(path)` | Show the DB path and disk size in the UI stats bar |
+
+No snapshots needed when embedding — you're reusing your service's existing DB connection, so there are no lock conflicts.
+
 ## UI search modes
 
 The search dropdown supports:
 
 - **Prefix**: fast range scan; matches keys that start with the query
-- **Contains**: slower; scans all keys and filters in memory (can be expensive on large DBs)
+- **Contains** (opt-in): slower; scans all keys and filters in memory (can be expensive on large DBs). Only available when `--substring-search` is passed (CLI) or `WithSubstringSearch()` is used (library).
+
+Search is triggered by pressing the **Refresh** button.
 
 ## HTTP API
+
+### GET `/api/config`
+
+Response:
+
+```json
+{
+  "substring_search": false
+}
+```
 
 ### GET `/api/stats`
 
@@ -48,6 +111,8 @@ Response:
   "db_size_bytes": 456789
 }
 ```
+
+Note: total key count is cached for 30 seconds.
 
 ### GET `/api/keys`
 
@@ -74,6 +139,8 @@ Response:
 }
 ```
 
+Note: `mode=substring` returns `403 Forbidden` if substring search is not enabled.
+
 ### GET `/api/key/<key>`
 
 The key must be URL-encoded.
@@ -88,5 +155,3 @@ Response:
   "size": 3
 }
 ```
-
-

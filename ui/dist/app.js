@@ -27,11 +27,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeTab = 'raw';
     let substringWarningShown = false;
 
+    // Resolve API base relative to where the page is served from.
+    // This ensures the UI works when mounted at a sub-path (e.g. /pebble-ui/).
+    const scriptEl = document.querySelector('script[src$="app.js"]');
+    const basePath = new URL('.', scriptEl.src).pathname.replace(/\/$/, '');
+
     async function fetchStats() {
         try {
-            const resp = await fetch('/api/stats');
+            const resp = await fetch(basePath + '/api/stats');
             const data = await resp.json();
-            dbPathEl.textContent = `DB: ${data.db_path}`;
+            if (data.db_path) {
+                dbPathEl.textContent = `DB: ${data.db_path}`;
+            } else {
+                dbPathEl.style.display = 'none';
+            }
             keyCountEl.textContent = `Keys: ${data.total_keys}`;
             totalKeys = data.total_keys;
             updatePagination();
@@ -43,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchKeys(query = '', offset = 0) {
         try {
             const mode = searchMode.value;
-            const resp = await fetch(`/api/keys?q=${encodeURIComponent(query)}&mode=${mode}&offset=${offset}&limit=${limit}`);
+            const resp = await fetch(`${basePath}/api/keys?q=${encodeURIComponent(query)}&mode=${mode}&offset=${offset}&limit=${limit}`);
             const data = await resp.json();
             currentKeys = data.keys || [];
             totalKeys = data.total;
@@ -56,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchValue(key) {
         try {
-            const resp = await fetch(`/api/key/${encodeURIComponent(key)}`);
+            const resp = await fetch(`${basePath}/api/key/${encodeURIComponent(key)}`);
             if (!resp.ok) throw new Error('Not found');
             const data = await resp.json();
             currentKey = data.key;
@@ -110,11 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
         nextBtn.disabled = (currentPage + 1) >= totalPages;
     }
 
-    searchInput.addEventListener('input', debounce(() => {
-        currentPage = 0;
-        fetchKeys(searchInput.value, 0);
-    }, 300));
-
     searchMode.addEventListener('change', () => {
         if (searchMode.value === 'substring') {
             searchMode.classList.add('warning');
@@ -125,13 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             searchMode.classList.remove('warning');
         }
-        currentPage = 0;
-        fetchKeys(searchInput.value, 0);
     });
 
     refreshBtn.onclick = () => {
+        currentPage = 0;
         fetchStats();
-        fetchKeys(searchInput.value, currentPage * limit);
+        fetchKeys(searchInput.value, 0);
     };
 
     prevBtn.onclick = () => {
@@ -185,14 +188,19 @@ document.addEventListener('DOMContentLoaded', () => {
         navigator.clipboard.writeText(valueDisplay.textContent);
     };
 
-    function debounce(func, wait) {
-        let timeout;
-        return function(...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
+    async function fetchConfig() {
+        try {
+            const resp = await fetch(basePath + '/api/config');
+            const data = await resp.json();
+            if (data.substring_search) {
+                document.querySelector('#search-mode option[value="substring"]').classList.remove('hidden');
+            }
+        } catch (e) {
+            console.error('Failed to fetch config', e);
+        }
     }
 
+    fetchConfig();
     fetchStats();
     fetchKeys();
 });

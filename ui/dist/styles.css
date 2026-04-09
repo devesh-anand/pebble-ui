@@ -55,7 +55,7 @@ main {
 }
 
 #sidebar {
-    width: 300px;
+    width: 33.33vw;
     min-width: 150px;
     max-width: 70vw;
     background: var(--sidebar-bg);

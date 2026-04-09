@@ -14,34 +14,32 @@ func Open(path string, readOnly bool) (*pebble.DB, error) {
 	return pebble.Open(path, opts)
 }
 
-// ListKeys returns a list of keys with pagination (prefix search).
-func ListKeys(db *pebble.DB, prefix string, limit, offset int) ([]string, error) {
+// ListKeys returns a page of keys matching the prefix along with the total
+// count of matching keys, in a single iterator pass.
+func ListKeys(db *pebble.DB, prefix string, limit, offset int) ([]string, int, error) {
 	var keys []string
 	iter, err := db.NewIter(&pebble.IterOptions{
 		LowerBound: []byte(prefix),
 	})
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer iter.Close()
 
-	count := 0
+	total := 0
 	for iter.First(); iter.Valid(); iter.Next() {
 		if prefix != "" && !bytes.HasPrefix(iter.Key(), []byte(prefix)) {
 			break
 		}
-		if count >= offset {
+		if total >= offset && len(keys) < limit {
 			keys = append(keys, string(append([]byte(nil), iter.Key()...)))
-			if len(keys) >= limit {
-				break
-			}
 		}
-		count++
+		total++
 	}
 	if err := iter.Error(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return keys, nil
+	return keys, total, nil
 }
 
 // ListKeysSubstring returns keys containing the substring (scans all keys).
